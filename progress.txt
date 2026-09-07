@@ -153,3 +153,19 @@ A Python virtual environment has not yet been created.
 
 Phase 2 Step 1 is complete. The next step is to create and use a Python virtual environment before running the application and verifying programmatic communication with the existing `agent-healthcare-rag` Foundry agent.
 
+STEP 2 — Python Connection to Foundry Agent
+
+Authenticated to Azure using the Azure CLI with `az login`.
+
+Successfully ran the Python application from the VS Code terminal.
+
+Connected programmatically to the existing Microsoft Foundry project `proj-healthcare-ai`.
+
+Successfully connected to the existing Foundry Agent `agent-healthcare-rag`.
+
+Tested the agent from the Python application with a question about the healthcare document.
+
+The agent successfully returned an answer grounded in the healthcare document.
+
+Step 2 is complete.
+---
