@@ -60,15 +60,13 @@ The model will provide the generation/reasoning layer for the healthcare RAG age
 
 The project uses the current New Foundry experience. `gpt-5-mini` was selected instead of the previously considered `gpt-4.1-mini` to avoid building the project around an older model lifecycle.
 ---
-STEP 7 — Managed Identity and RBAC Configuration
+STEP 7 UPDATE — Foundry Project Search Access
 
-Enabled a system-assigned managed identity on Azure AI Search `search-healthcare-ai`.
+Enabled the system-assigned managed identity for the Microsoft Foundry project `proj-healthcare-ai`.
 
-Granted `Storage Blob Data Contributor` on storage account `sthealthcaredocs2026` to the managed identity of `search-healthcare-ai`.
+Granted the `Search Index Data Reader` role on Azure AI Search service `search-healthcare-ai` to the managed identity of the Foundry project.
 
-Granted `Cognitive Services User` on Microsoft Foundry resource `foundry-healthcare-ai` to the managed identity of `search-healthcare-ai`.
-
-These permissions allow Azure AI Search to securely access the healthcare documents in Blob Storage and use the required Foundry model capabilities without storing access keys or secrets.
+This permission allows the Foundry Agent Service to securely access the Azure AI Search knowledge base through the knowledge base MCP endpoint.
 ---
 STEP 8 — Azure AI Search Blob Knowledge Source
 
