@@ -50,3 +50,13 @@ The deployment is available to the Foundry project and will be used to generate 
 
 The project is using the New Foundry experience.
 ---
+STEP 6 — Generation Model
+
+Deployed the `gpt-5-mini` model in Microsoft Foundry.
+
+Deployment name: `gpt-5-mini`.
+
+The model will provide the generation/reasoning layer for the healthcare RAG agent.
+
+The project uses the current New Foundry experience. `gpt-5-mini` was selected instead of the previously considered `gpt-4.1-mini` to avoid building the project around an older model lifecycle.
+---
