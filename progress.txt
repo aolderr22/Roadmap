@@ -200,3 +200,20 @@ Tested the refactored application successfully from the VS Code terminal.
 The application continues to connect to `agent-healthcare-rag` and successfully answer questions using the healthcare document.
 
 Step 4 is complete.
+---
+### Step 5 — FastAPI API
+
+Added FastAPI to the Python application and exposed the Healthcare RAG Agent through an HTTP API.
+
+* Added FastAPI and Uvicorn dependencies.
+* Created `app/api.py`.
+* Added `GET /health` endpoint.
+* Added `POST /ask` endpoint for submitting questions to the Foundry Agent.
+* Verified the FastAPI application starts successfully with Uvicorn.
+* Verified the API endpoint is accessible through the FastAPI Swagger UI at `/docs`.
+* Kept the Foundry client and configuration logic separated in `foundry_client.py` and `config.py`.
+
+The Python application now provides both:
+
+* a terminal-based client through `main.py`
+* an HTTP API through FastAPI
