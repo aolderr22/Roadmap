@@ -169,3 +169,18 @@ The agent successfully returned an answer grounded in the healthcare document.
 
 Step 2 is complete.
 ---
+STEP 3 — Separate Foundry Client Logic
+
+Created `app/foundry_client.py` to encapsulate the Microsoft Foundry project connection and agent client configuration.
+
+Updated `app/main.py` to use the Foundry client instead of containing the connection setup directly.
+
+The application now separates responsibilities:
+
+`main.py` handles command-line interaction, while `foundry_client.py` handles the Microsoft Foundry connection and authentication.
+
+Tested the refactored application successfully from the VS Code terminal.
+
+The application continues to connect to `agent-healthcare-rag` and successfully answer questions using the healthcare document.
+
+Step 3 is complete.
