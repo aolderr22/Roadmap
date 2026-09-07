@@ -70,3 +70,15 @@ Granted `Cognitive Services User` on Microsoft Foundry resource `foundry-healthc
 
 These permissions allow Azure AI Search to securely access the healthcare documents in Blob Storage and use the required Foundry model capabilities without storing access keys or secrets.
 ---
+STEP 8 — Azure AI Search Blob Knowledge Source
+
+Created Blob Knowledge Source `ks-healthcare-docs` in Azure AI Search.
+
+The knowledge source connects Azure AI Search to the `healthcare-documents` container in storage account `sthealthcaredocs2026`.
+
+Text vectorization is enabled using the embedding model deployed in Microsoft Foundry.
+
+The healthcare PDF has been ingested into the Azure AI Search retrieval pipeline.
+
+Azure AI Search automatically created the indexing pipeline required to make the document available for agentic retrieval.
+---
