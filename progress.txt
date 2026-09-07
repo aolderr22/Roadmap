@@ -14,7 +14,7 @@ Created the `healthcare-documents` container in Azure Storage Account `sthealthc
 
 Configured the container for private access.
 
-Uploaded two healthcare PDF documents to the container.
+Uploaded one healthcare PDF document to the container.
 
 The documents are now stored in Azure Blob Storage / Data Lake Storage Gen2 and ready to be connected to the RAG retrieval pipeline.
 ---
