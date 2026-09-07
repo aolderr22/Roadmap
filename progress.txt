@@ -98,5 +98,9 @@ Connected the agent to the Azure AI Search knowledge base `kb-healthcare`.
 
 The knowledge base provides grounded retrieval from the healthcare document stored in Azure Blob Storage through the `ks-healthcare-docs` knowledge source.
 
-Tested the agent successfully with a question based on the healthcare document and verified that the response is grounded in the source with citations.
+Tested the agent successfully with questions based on the healthcare document.
+
+Verified that the agent retrieves information from the indexed PDF and can provide answers containing specific numeric evidence from the source.
+
+The Foundry agent currently displays `mcp:answers synthesis` as the citation/reference rather than exposing a direct citation to the underlying PDF. The retrieval and grounding pipeline is nevertheless functioning end-to-end.
 ---
