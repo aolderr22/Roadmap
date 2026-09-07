@@ -184,3 +184,19 @@ Tested the refactored application successfully from the VS Code terminal.
 The application continues to connect to `agent-healthcare-rag` and successfully answer questions using the healthcare document.
 
 Step 3 is complete.
+---
+STEP 4 — Add Configuration Layer
+
+Created `app/config.py` to centralize application configuration.
+
+Moved the `PROJECT_ENDPOINT` and `AGENT_NAME` environment-variable handling out of `foundry_client.py` and into the configuration layer.
+
+Updated `app/foundry_client.py` to obtain configuration values from `config.py`.
+
+The application now separates configuration, Foundry client infrastructure, and application logic.
+
+Tested the refactored application successfully from the VS Code terminal.
+
+The application continues to connect to `agent-healthcare-rag` and successfully answer questions using the healthcare document.
+
+Step 4 is complete.
