@@ -106,3 +106,36 @@ Verified that the agent retrieves information from the indexed PDF and can provi
 
 The Foundry agent currently displays `mcp:answers synthesis` as the citation/reference rather than exposing a direct citation to the underlying PDF. The retrieval and grounding pipeline is nevertheless functioning end-to-end.
 ---
+---
+
+PHASE 1 COMPLETE
+
+Completed the Azure-based healthcare RAG foundation.
+
+The system now consists of:
+
+Healthcare PDF → Azure Blob Storage → Azure AI Search Knowledge Source → chunking and embeddings → Azure AI Search index → Knowledge Base → Foundry IQ/MCP retrieval → Foundry Agent → `gpt-5-mini`.
+
+Verified that the healthcare PDF was successfully indexed into Azure AI Search with 22 indexed chunks.
+
+Verified that each chunk contains a 1536-dimensional vector generated using `text-embedding-3-small`.
+
+Verified that the Foundry Agent can answer questions using evidence from the healthcare document.
+
+The Foundry Agent currently displays `mcp:answers synthesis` rather than a direct citation to the underlying PDF. This does not prevent the RAG pipeline from retrieving and using the document successfully.
+
+Phase 1 is considered complete.
+
+---
+
+PHASE 2
+
+STEP 1 — Python Project Setup
+
+Created the initial Python project for programmatic interaction with Microsoft Foundry.
+
+The initial project will use the Microsoft Foundry Python SDK and Azure Identity for authentication.
+
+The first objective is to connect Python to the existing Foundry project `proj-healthcare-ai` without introducing an additional agent framework.
+
+LangChain and LangGraph will be introduced in later Phase 2 steps after the basic Foundry connection is working.
