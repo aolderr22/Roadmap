@@ -92,3 +92,13 @@ Configured `gpt-5-mini` as the model deployment for the knowledge base.
 
 The knowledge base now provides the agentic retrieval layer for the healthcare RAG system, orchestrating retrieval from the healthcare document knowledge source and supporting grounded answer generation.
 ---
+STEP 10 — Foundry RAG Agent
+
+Created the Microsoft Foundry prompt agent `agent-healthcare-rag` using the deployed `gpt-5-mini` model.
+
+Connected the agent to the Azure AI Search knowledge base `kb-healthcare`.
+
+The knowledge base provides grounded retrieval from the healthcare document stored in Azure Blob Storage through the `ks-healthcare-docs` knowledge source.
+
+Tested the agent successfully with a question based on the healthcare document and verified that the response is grounded in the source with citations.
+---
