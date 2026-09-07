@@ -4,61 +4,56 @@
 
 Build a production-oriented healthcare document retrieval system using Microsoft Azure.
 
-The system should ingest healthcare documents, index and retrieve relevant information, and use a foundation model to produce grounded answers with citations.
+The system will ingest healthcare documents, index and retrieve relevant information, and use a foundation model to produce grounded answers with citations.
 
-The goal of Phase 1 is to learn the fundamental infrastructure behind a modern **RAG / AI engineering system**, not simply to make a chatbot.
+The goal is to learn the fundamental infrastructure behind a modern RAG / AI engineering system rather than simply building a chatbot.
+
+> **Important:** Microsoft Foundry, Foundry IQ, and Azure AI Search are evolving rapidly. Treat the Azure portal UI and individual configuration screens as implementation details. Prefer the current Microsoft documentation when a portal label differs from this roadmap.
 
 ---
 
-# 1. Project Architecture
+# 1. Target Architecture
 
-Build the following architecture:
+Build toward:
 
 ```text
-                         Healthcare PDFs
-                               │
-                               ▼
-                    Azure Blob Storage
-                               │
-                               ▼
-                       Knowledge Source
-                               │
-                               ▼
-                     Azure AI Search
-                  ┌────────────┴────────────┐
-                  │                         │
-             Keyword Search            Vector Search
-                  │                         │
-                  └────────────┬────────────┘
-                               │
-                         Hybrid Retrieval
-                               │
-                               ▼
-                         Foundry IQ
-                               │
-                               ▼
-                        Knowledge Base
-                               │
-                               ▼
-                       Microsoft Foundry
-                               │
-                               ▼
-                          AI Agent
-                               │
-                               ▼
-                       Foundation Model
-                               │
-                               ▼
-                    Grounded Answer + Citations
+Healthcare Documents
+        │
+        ▼
+Azure Blob Storage
+        │
+        ▼
+Knowledge Source
+        │
+        ▼
+Azure AI Search
+        │
+        ├── Keyword Search
+        ├── Vector Search
+        ├── Hybrid Search
+        └── Semantic Reranking
+        │
+        ▼
+Knowledge Base
+        │
+        ▼
+Foundry IQ
+        │
+        ▼
+Foundry Agent
+        │
+        ▼
+Foundation Model
+        │
+        ▼
+Grounded Answer + Citations
 ```
 
-Azure AI Search is the retrieval layer. Foundry IQ provides the managed knowledge layer above it. Microsoft documents Foundry IQ as using Azure AI Search's agentic retrieval capabilities for query planning, retrieval, reranking, and grounded responses.
+Current Microsoft documentation describes Foundry IQ as a managed knowledge layer for agents. Azure AI Search provides the agentic retrieval engine underneath, including query planning, subqueries, retrieval, reranking, and references for citations.
 
 ---
 
-# 2. Azure Resources
-
-Create the following resources.
+# 2. Recommended Azure Resources
 
 | Resource                   | Suggested Name          |
 | -------------------------- | ----------------------- |
@@ -75,19 +70,23 @@ Create the following resources.
 
 Use a consistent Azure region where practical.
 
+Resource names may need to be modified to satisfy Azure naming restrictions.
+
 ---
 
 # 3. Azure Blob Storage
 
-Use Azure Blob Storage as the project's document repository.
+Use Azure Blob Storage as the persistent document repository.
 
 ## Tasks
 
 1. Create an Azure Storage Account.
-2. Create a blob container named `healthcare-documents`.
-3. Upload the healthcare PDFs.
-4. Organize documents using sensible naming conventions.
+2. Create a container named `healthcare-documents`.
+3. Upload the healthcare documents.
+4. Organize documents logically.
 5. Add useful metadata where appropriate.
+6. Configure the required Microsoft Entra/RBAC permissions.
+7. Connect the storage data to Azure AI Search through an appropriate knowledge source.
 
 Example:
 
@@ -106,9 +105,9 @@ healthcare-documents/
     └── healthcare-policy.pdf
 ```
 
-The objective is to establish **persistent document storage** rather than relying on files uploaded directly into the Search service.
+Azure AI Search currently supports indexed knowledge sources backed by Azure Blob Storage and ADLS Gen2. Indexed knowledge sources use Azure AI Search indexing infrastructure to ingest and refresh content.
 
-Azure AI Search currently supports Blob Storage and ADLS Gen2 as indexed knowledge sources and can automatically create the indexing pipeline for Blob content.
+The objective is to establish persistent document storage rather than relying exclusively on manually uploaded files.
 
 ---
 
@@ -118,75 +117,113 @@ Create the Foundry environment.
 
 ## Tasks
 
-1. Create the Foundry resource.
+1. Create the Microsoft Foundry resource.
 2. Create the Foundry project.
 3. Enable the project managed identity.
-4. Deploy a suitable foundation model.
-5. Record the model deployment name.
-6. Create the healthcare RAG agent.
+4. Deploy a suitable chat model.
+5. Record the deployment name.
+6. Create the healthcare agent.
 
-Recommended initial model:
+Initial model:
 
 ```text
 gpt-4.1-mini
 ```
 
-Do not treat the model as the RAG system.
+The model is only one component of the system.
 
 Understand the separation:
 
 ```text
-Model
-   ↓
+Foundation Model
+       │
+       ▼
 Generates language
 
 Azure AI Search
-   ↓
+       │
+       ▼
 Retrieves knowledge
 
 Foundry IQ
-   ↓
-Coordinates knowledge retrieval
+       │
+       ▼
+Provides managed knowledge access
 
-Agent
-   ↓
-Uses the model + tools + knowledge
+Foundry Agent
+       │
+       ▼
+Uses model + knowledge + tools
 ```
+
+The specific model used may change as the project evolves.
 
 ---
 
 # 5. Azure AI Search
 
-Create a dedicated Azure AI Search service capable of supporting the agentic-retrieval scenario.
+Create an Azure AI Search service that supports the agentic-retrieval scenario.
 
 ## Tasks
 
 1. Create the Search service.
-2. Enable system-assigned managed identity.
-3. Enable Microsoft Entra/RBAC authentication.
-4. Configure the necessary RBAC roles.
-5. Connect the Search service to Foundry.
-6. Verify that the identities can access the required resources.
+2. Enable a system-assigned managed identity.
+3. Configure Microsoft Entra/RBAC authentication.
+4. Assign the required RBAC roles.
+5. Connect the Search service to the required Azure services.
+6. Verify identity-based access.
+7. Create the knowledge source.
+8. Create the knowledge base.
 
-Understand the three major retrieval concepts:
+Understand the retrieval stack:
 
 ```text
 Keyword Search
       +
 Vector Search
       +
-Semantic / Reranking
+Hybrid Search
+      +
+Semantic Reranking
       ↓
-Hybrid Retrieval
+Agentic Retrieval
 ```
 
-Azure AI Search supports keyword, vector, and hybrid retrieval, and its agentic retrieval layer can decompose complex queries into subqueries and aggregate results.
+Current Azure AI Search documentation describes agentic retrieval as a multi-query retrieval pipeline. A knowledge base can decompose complex questions into subqueries, execute them against knowledge sources, use keyword/vector/hybrid retrieval, rerank results, and retain source references.
 
 ---
 
-# 6. Embeddings
+# 6. Knowledge Sources
 
-Learn what embeddings are and why they are necessary for semantic retrieval.
+Create one or more knowledge sources.
+
+Initial knowledge source:
+
+```text
+ks-healthcare-docs
+```
+
+Use the knowledge-source type appropriate to the current Microsoft Foundry/Azure AI Search portal.
+
+For this project, prefer an indexed source backed by Azure Blob Storage once the basic RAG pipeline is working.
+
+Understand:
+
+```text
+Blob Storage
+      ↓
+Knowledge Source
+      ↓
+Azure AI Search Index
+```
+
+A knowledge base can reference multiple knowledge sources. This means the project should be designed so additional document collections can be added later without rebuilding the entire Azure environment.
+
+---
+
+# 7. Embeddings
+
+Learn what embeddings are and why vector retrieval works.
 
 Understand:
 
@@ -211,24 +248,36 @@ Embedding Model
    ↓
 Query Vector
    ↓
-Vector Similarity
+Vector Search
    ↓
-Relevant Chunks
+Relevant Content
 ```
 
-You do not necessarily need to manually implement embeddings in this phase.
+Learn:
 
-The goal is to understand what the managed Azure pipeline is doing underneath the abstraction.
+* Embeddings
+* Vector representations
+* Dimensions
+* Similarity
+* Cosine similarity
+* Approximate nearest-neighbor search
+* Vector indexes
+* Metadata filtering
+
+Do not manually implement the entire embedding pipeline initially.
+
+First understand what the managed Azure pipeline is doing.
 
 ---
 
-# 7. Chunking
+# 8. Chunking
 
-Study and test document chunking.
+Understand how documents become retrievable pieces of information.
 
-Understand:
+Study:
 
-* Why documents are divided into chunks
+* Text extraction
+* Chunk boundaries
 * Chunk size
 * Chunk overlap
 * Context preservation
@@ -239,60 +288,68 @@ Understand:
 Conceptually:
 
 ```text
-Large PDF
-   ↓
-Text extraction
-   ↓
+PDF
+ ↓
+Text Extraction
+ ↓
 Chunking
-   ↓
+ ↓
 Embedding
-   ↓
+ ↓
 Index
 ```
 
-Test whether changing document structure or chunking affects retrieval quality.
+Test how document structure and chunking influence retrieval quality.
 
-Foundry IQ/Azure AI Search can automate chunking and vectorization for indexed knowledge sources, but an AI engineer should understand what is happening rather than treating it as magic.
+The objective is not merely to know that "chunking happens."
+
+The objective is to understand why poor chunking can produce poor RAG results.
 
 ---
 
-# 8. Vector Database / Vector Store Knowledge
+# 9. Vector Database / Vector Store Knowledge
 
 Understand the role of a vector database/vector index.
 
-Learn the concepts behind:
+Learn:
 
 * Embeddings
-* Vector representations
-* Cosine similarity
+* Vector similarity
 * Approximate nearest-neighbor search
 * Vector indexes
 * Metadata filtering
 * Hybrid search
+* Reranking
 
-Understand that:
+Understand that Azure AI Search can provide vector retrieval and therefore serves as the retrieval/vector-search layer for this project.
 
-```text
-Azure AI Search
-```
+Do not add Pinecone to the primary project yet.
 
-can provide vector retrieval and therefore can serve as the retrieval/vector-search layer for this project.
-
-Do **not** add Pinecone yet.
-
-Later, create a separate experiment comparing:
+Later create a separate experiment:
 
 ```text
 Azure AI Search
-        vs
+       vs
 Pinecone
 ```
 
-The objective is to understand when each technology makes sense.
+Compare:
+
+* Architecture
+* Indexing
+* Metadata filtering
+* Hybrid retrieval
+* Embeddings
+* Operational complexity
+* Cost
+* Azure integration
+* Developer experience
+
+The goal is to understand the technology rather than accumulate services.
 
 ---
 
-# 9. Foundry IQ Knowledge Base
+# 10. Knowledge Base
 
 Create:
 
@@ -300,27 +357,63 @@ Create:
 kb-healthcare
 ```
 
-Connect the healthcare knowledge source.
+Connect the healthcare knowledge source(s).
 
-The knowledge base should be capable of querying the healthcare documents and returning grounded content.
-
-Understand the relationship:
+Understand:
 
 ```text
-Knowledge Source
+Knowledge Source(s)
+        ↓
+Knowledge Base
+        ↓
+Agentic Retrieval
+        ↓
+Retrieved Knowledge
+```
+
+A knowledge base is the object that orchestrates retrieval across configured knowledge sources. Current Azure AI Search documentation describes the knowledge base as a top-level object for agentic retrieval.
+
+---
+
+# 11. Foundry IQ
+
+Use Foundry IQ as the managed knowledge layer for the agent.
+
+Understand:
+
+```text
+Knowledge Sources
        ↓
 Knowledge Base
        ↓
 Foundry IQ
        ↓
-Agent
+Foundry Agent
 ```
 
-A Foundry IQ knowledge base can reference multiple knowledge sources and can be shared by multiple agents.
+Foundry IQ is designed to provide reusable, permission-aware knowledge to agents and can connect knowledge bases to multiple agents.
+
+Do not think of Foundry IQ as another vector database.
+
+Instead:
+
+```text
+Azure AI Search
+    =
+Retrieval / search infrastructure
+
+Foundry IQ
+    =
+Managed knowledge layer
+
+Foundry Agent
+    =
+Agentic application layer
+```
 
 ---
 
-# 10. Foundry Agent
+# 12. Foundry Agent
 
 Create:
 
@@ -328,31 +421,60 @@ Create:
 agent-healthcare-rag
 ```
 
-Connect:
-
-```text
-agent-healthcare-rag
-        ↓
-kb-healthcare
-        ↓
-Azure AI Search
-        ↓
-Healthcare Documents
-```
+Connect the healthcare knowledge base.
 
 Configure the agent to:
 
-* Use the healthcare knowledge base
-* Ground responses in retrieved information
-* Provide citations
-* Avoid inventing medical information
-* Clearly state when information cannot be found
+* Use the healthcare knowledge base.
+* Ground answers in retrieved information.
+* Provide citations.
+* Avoid unsupported claims.
+* State when information cannot be found.
+* Follow the project's healthcare safety instructions.
 
-This is a **document retrieval and knowledge assistant**, not a medical diagnosis system.
+The agent is a document-information assistant, not a medical diagnosis system.
 
 ---
 
-# 11. Retrieval Testing
+# 13. RAG Testing
+
+Create test questions covering several categories.
+
+## Document A
+
+Ask questions whose answers exist only in Document A.
+
+## Document B
+
+Ask questions whose answers exist only in Document B.
+
+## Multiple Documents
+
+Ask questions requiring information from multiple documents.
+
+## No Answer
+
+Ask questions whose answers do not exist in the knowledge base.
+
+## Semantic Retrieval
+
+Ask questions using different wording from the source documents.
+
+## Keyword Retrieval
+
+Ask questions containing important exact terminology.
+
+## Multi-Part Questions
+
+Ask questions requiring multiple pieces of evidence.
+
+## Follow-Up Questions
+
+Test whether the agent maintains appropriate conversational context.
+
+---
+
+# 14. RAG Evaluation
 
 Create a small evaluation dataset.
 
@@ -362,115 +484,121 @@ For example:
 questions.json
 ```
 
-containing questions such as:
-
-```text
-1. Answer exists in document A.
-2. Answer exists in document B.
-3. Answer requires documents A and B.
-4. Similar wording but different answer.
-5. Question requiring semantic retrieval.
-6. Question requiring keyword retrieval.
-7. Question with no answer in the documents.
-8. Ambiguous question.
-9. Multi-part question.
-10. Follow-up question.
-```
-
-For each question record:
+Track:
 
 ```text
 Question
-Expected answer
-Retrieved document
-Retrieved chunk
-Actual answer
+Expected Answer
+Expected Source
+Retrieved Source
+Retrieved Content
+Actual Answer
 Citation
 Correct?
+Grounded?
 ```
-
----
-
-# 12. RAG Evaluation
-
-Do not stop when the chatbot produces an answer.
 
 Evaluate:
 
-### Retrieval quality
+### Retrieval
 
-* Did the correct document get retrieved?
-* Did the correct chunk get retrieved?
-* Were irrelevant chunks retrieved?
+* Was the correct source retrieved?
+* Was relevant content retrieved?
+* Were irrelevant results returned?
 
-### Generation quality
+### Generation
 
 * Is the answer correct?
-* Is it grounded?
+* Is the answer grounded?
 * Does it contain unsupported claims?
-* Does it cite the correct source?
+* Are citations appropriate?
 
-### Failure behavior
+### Failure Handling
 
-Test questions that cannot be answered from the knowledge base.
-
-The agent should not simply invent an answer.
+* Does the agent correctly say when the knowledge base lacks the answer?
+* Does it avoid hallucinating?
 
 ---
 
-# 13. Security
+# 15. Retrieval Observability
 
-Use Microsoft Entra ID and managed identities wherever practical.
+Learn how to inspect what the retrieval system is actually doing.
 
-Understand:
+Investigate:
+
+* Query plans
+* Subqueries
+* Retrieved documents
+* Retrieved chunks
+* Ranking
+* Reranking
+* Citations
+* Latency
+* Token usage
+
+Azure AI Search's current agentic-retrieval tooling exposes retrieval activity that can be used to understand how a query was processed.
+
+This is important because an AI engineer needs to diagnose:
 
 ```text
-User
- ↓
-Entra ID
- ↓
-Managed Identity
- ↓
-Azure Resource
+Bad Answer
+    ↓
+Was retrieval bad?
+    ↓
+Was the prompt bad?
+    ↓
+Was the model bad?
+    ↓
+Was the source document bad?
 ```
+
+---
+
+# 16. Security
+
+Use Microsoft Entra ID and managed identities wherever practical.
 
 Learn:
 
 * RBAC
 * Managed identities
 * Least privilege
-* Key-based authentication
-* Secrets
+* Microsoft Entra authentication
+* API keys
 * Environment variables
+* Secrets
 * Azure Key Vault
 
-Do not commit:
+Prefer:
+
+```text
+Managed Identity
+```
+
+over long-lived API keys for Azure-to-Azure production authentication where supported.
+
+Never commit:
 
 ```text
 .env
 API keys
-passwords
-connection strings
+Passwords
+Connection strings
+Secrets
 ```
 
 to Git.
 
 ---
 
-# 14. Python Experiment
+# 17. Python Application
 
-Create a small Python client that calls the Foundry agent.
+Create a Python client.
 
-Repository:
-
-```text
-azure-rag-healthcare/
-```
-
-Suggested structure:
+Suggested repository:
 
 ```text
-azure-rag-healthcare/
+azure-healthcare-rag/
 │
 ├── app/
 │   ├── __init__.py
@@ -500,15 +628,18 @@ Foundry IQ
 Azure AI Search
 ```
 
+The Python application should eventually become the backend of the application rather than relying on the Foundry portal UI.
+
 ---
 
-# 15. FastAPI
+# 18. FastAPI
 
-Expose the AI application through an HTTP API.
+Expose the AI application through HTTP.
 
 Create:
 
 ```text
+GET  /health
 POST /ask
 ```
 
@@ -516,11 +647,11 @@ Example:
 
 ```json
 {
-    "question": "What does the document say about..."
+    "question": "What does the healthcare documentation say about..."
 }
 ```
 
-Return:
+Return structured data such as:
 
 ```json
 {
@@ -529,33 +660,29 @@ Return:
 }
 ```
 
-Also create:
-
-```text
-GET /health
-```
-
-Test the API using Swagger/OpenAPI.
-
 Architecture:
 
 ```text
-Client
-  ↓
+Angular
+   ↓
 FastAPI
-  ↓
+   ↓
 Python AI Application
-  ↓
+   ↓
 Foundry Agent
-  ↓
-RAG
+   ↓
+Foundry IQ
+   ↓
+Azure AI Search
 ```
+
+Test the API through Swagger/OpenAPI.
 
 ---
 
-# 16. Containerization
+# 19. Docker
 
-Create a Docker image for the FastAPI application.
+Containerize the FastAPI application.
 
 Learn:
 
@@ -564,308 +691,197 @@ Learn:
 * Containers
 * Environment variables
 * Ports
-* Container networking
 * `.dockerignore`
-
-Architecture:
-
-```text
-Angular / Client
-       ↓
-FastAPI Container
-       ↓
-Foundry
-       ↓
-Azure AI Search
-       ↓
-Healthcare Documents
-```
-
----
-
-# 17. Azure Deployment
-
-Deploy the containerized FastAPI application to Azure.
-
-Recommended first deployment target:
-
-```text
-Azure Container Apps
-```
-
-Do not start with Kubernetes.
-
-First understand:
-
-```text
-Docker
-  ↓
-Container
-  ↓
-Azure Container Apps
-```
-
-Then later experiment with:
-
-```text
-Docker
-  ↓
-AKS / Kubernetes
-```
-
----
-
-# 18. Observability
-
-Add basic application monitoring.
-
-Learn:
-
-* Application logs
-* Request latency
-* Error rates
-* Token usage
-* Retrieval latency
-* Search failures
-* Model failures
-
-Investigate:
-
-```text
-Application Insights
-Azure Monitor
-```
-
-The objective is to understand how an AI application behaves after deployment.
-
----
-
-# 19. Healthcare Safety
-
-Because the project uses healthcare documents, explicitly implement responsible-AI boundaries.
-
-The application should:
-
-* Ground responses in provided sources.
-* Provide citations.
-* Avoid pretending to be a medical professional.
-* Avoid making unsupported diagnoses.
-* Indicate when information is unavailable.
-* Clearly distinguish document information from generated explanation.
-
-Use synthetic, public, or otherwise appropriately licensed documents for the project.
-
-Do not use real patient records or protected health information for experimentation.
-
----
-
-# 20. Phase 1 Deliverables
-
-At the end of Phase 1, you should have:
-
-```text
-[✓] Azure Resource Group
-
-[✓] Microsoft Foundry
-[✓] Foundry Project
-[✓] Foundation Model Deployment
-[✓] Foundry Agent
-
-[✓] Azure Blob Storage
-[✓] Healthcare Document Container
-
-[✓] Azure AI Search
-[✓] RBAC
-[✓] Managed Identity
-
-[✓] Knowledge Source
-[✓] Knowledge Base
-[✓] Foundry IQ
-
-[✓] Vector / Semantic Retrieval
-
-[✓] Chunking Understanding
-
-[✓] RAG Evaluation Dataset
-
-[✓] Python Client
-
-[✓] FastAPI API
-
-[✓] Docker Container
-
-[✓] Azure Deployment
-
-[✓] Basic Monitoring
-```
-
----
-
-# Phase 1 Final Architecture
-
-```text
-                         ┌─────────────────────┐
-                         │ Healthcare Documents│
-                         └──────────┬──────────┘
-                                    │
-                                    ▼
-                         ┌─────────────────────┐
-                         │   Azure Blob        │
-                         │     Storage         │
-                         └──────────┬──────────┘
-                                    │
-                                    ▼
-                         ┌─────────────────────┐
-                         │ Knowledge Source    │
-                         └──────────┬──────────┘
-                                    │
-                                    ▼
-                         ┌─────────────────────┐
-                         │  Azure AI Search    │
-                         │                     │
-                         │ Keyword             │
-                         │ Vector              │
-                         │ Hybrid              │
-                         │ Semantic Retrieval  │
-                         └──────────┬──────────┘
-                                    │
-                                    ▼
-                         ┌─────────────────────┐
-                         │     Foundry IQ      │
-                         │   Knowledge Base    │
-                         └──────────┬──────────┘
-                                    │
-                                    ▼
-                         ┌─────────────────────┐
-                         │   Foundry Agent     │
-                         └──────────┬──────────┘
-                                    │
-                                    ▼
-                         ┌─────────────────────┐
-                         │ Foundation Model    │
-                         │    gpt-4.1-mini     │
-                         └──────────┬──────────┘
-                                    │
-                                    ▼
-                         ┌─────────────────────┐
-                         │ Grounded Response   │
-                         │   + Citations       │
-                         └──────────┬──────────┘
-                                    │
-                                    ▼
-                         ┌─────────────────────┐
-                         │      FastAPI        │
-                         └──────────┬──────────┘
-                                    │
-                                    ▼
-                         ┌─────────────────────┐
-                         │ Angular / Web App   │
-                         └─────────────────────┘
-```
-
----
-
-# What This Phase Teaches
-
-By completing Phase 1, you should be able to explain:
-
-* What RAG is.
-* Why RAG is useful.
-* What embeddings are.
-* What a vector store/index does.
-* How chunking affects retrieval.
-* How hybrid search works.
-* What Azure AI Search does.
-* What Foundry IQ does.
-* What a knowledge source is.
-* What a knowledge base is.
-* What an AI agent does.
-* How a foundation model fits into the architecture.
-* How managed identities work.
-* How Azure RBAC works.
-* How Python communicates with Azure AI services.
-* How FastAPI exposes an AI application.
-* How Docker packages the application.
-* How to deploy the application to Azure.
-* How to evaluate RAG quality.
-* How to monitor an AI application.
-* How to design basic safety boundaries for healthcare AI.
-
----
-
-# Important: Do Not Build Everything at Once
-
-This is a **roadmap**, not a requirement to create every resource immediately.
-
-Build incrementally:
-
-```text
-Stage 1
-Azure + Foundry + AI Search
-        ↓
-Stage 2
-Blob Storage + RAG
-        ↓
-Stage 3
-Retrieval evaluation
-        ↓
-Stage 4
-Python
-        ↓
-Stage 5
-FastAPI
-        ↓
-Stage 6
-Docker
-        ↓
-Stage 7
-Azure deployment
-        ↓
-Stage 8
-Monitoring
-```
-
-Only move forward when the previous stage works.
-
----
-
-# Future Phases
-
-## Phase 2 — AI Application Engineering
-
-Add:
-
-* LangChain
-* LangGraph
-* Explicit application state
-* Conversation state
-* Working memory
-* Episodic memory
-* Semantic memory
-* Tool calling
-* MCP
-* Structured outputs
-* Retry/error handling
-* Agent evaluation
+* Container networking
+* Health checks
 
 Architecture:
 
 ```text
 Angular
    ↓
-FastAPI
+FastAPI Container
    ↓
-LangGraph
+Foundry
    ↓
-State
-   ├── Working Memory
-   ├── Episodic Memory
-   └── Semantic Memory
-   ↓
-Agent
-   ↓
-Foundry / RAG
+Azure AI Search
 ```
+
+---
+
+# 20. Azure Deployment
+
+Deploy the containerized backend to Azure.
+
+Recommended first target:
+
+```text
+Azure Container Apps
+```
+
+Learn:
+
+```text
+Docker
+   ↓
+Container
+   ↓
+Azure Container Apps
+```
+
+Do not begin with Kubernetes.
+
+Kubernetes/AKS should come later after Docker and Azure Container Apps are understood.
+
+---
+
+# 21. Monitoring
+
+Add application and infrastructure monitoring.
+
+Investigate:
+
+* Azure Monitor
+* Application Insights
+* Application logs
+* Request latency
+* Error rates
+* Retrieval latency
+* Model latency
+* Token usage
+* Search failures
+
+Learn how to diagnose production failures.
+
+---
+
+# 22. Healthcare Safety
+
+Use only synthetic, public, or appropriately licensed documents.
+
+Do not use real patient records or protected health information for this learning project.
+
+The application should:
+
+* Ground answers in the provided sources.
+* Provide citations.
+* Avoid unsupported medical advice.
+* Avoid pretending to diagnose patients.
+* State when information is unavailable.
+* Clearly distinguish source information from generated explanation.
+
+---
+
+# 23. Phase 1 Deliverables
+
+By the end of Phase 1:
+
+```text
+[ ] Azure Resource Group
+
+[ ] Microsoft Foundry
+[ ] Foundry Project
+[ ] Foundation Model Deployment
+[ ] Foundry Agent
+
+[ ] Azure Blob Storage
+[ ] Healthcare Document Container
+
+[ ] Azure AI Search
+[ ] Managed Identity
+[ ] RBAC
+
+[ ] Knowledge Source
+[ ] Knowledge Base
+[ ] Foundry IQ
+
+[ ] Vector Retrieval
+[ ] Hybrid Retrieval
+[ ] Semantic Reranking
+
+[ ] Embedding Understanding
+[ ] Chunking Understanding
+
+[ ] RAG Evaluation Dataset
+[ ] Retrieval Evaluation
+
+[ ] Python Client
+[ ] FastAPI API
+
+[ ] Docker Container
+
+[ ] Azure Deployment
+
+[ ] Monitoring
+```
+
+---
+
+# 24. Final Phase 1 Architecture
+
+```text
+                 Healthcare Documents
+                         │
+                         ▼
+                 Azure Blob Storage
+                         │
+                         ▼
+                  Knowledge Source
+                         │
+                         ▼
+                Azure AI Search
+                         │
+             ┌───────────┼───────────┐
+             │           │           │
+          Keyword      Vector     Hybrid
+             │           │           │
+             └───────────┼───────────┘
+                         │
+                  Semantic Ranking
+                         │
+                         ▼
+                   Knowledge Base
+                         │
+                         ▼
+                    Foundry IQ
+                         │
+                         ▼
+                   Foundry Agent
+                         │
+                         ▼
+                  Foundation Model
+                         │
+                         ▼
+              Grounded Answer
+                 + Citations
+                         │
+                         ▼
+                      FastAPI
+                         │
+                         ▼
+                  Angular Client
+```
+
+---
+
+# 25. Future Phases
+
+## Phase 2 — AI Application Engineering
+
+Learn and implement:
+
+* LangChain
+* LangGraph
+* State management
+* Conversation state
+* Working memory
+* Long-term memory
+* Tool calling
+* MCP
+* Structured outputs
+* Error handling
+* Retries
+* Agent evaluation
 
 ---
 
@@ -875,31 +891,31 @@ Experiment with:
 
 * Custom chunking
 * Metadata filtering
-* Hybrid retrieval
-* Reranking
+* Hybrid search
 * Query rewriting
 * Query decomposition
-* Retrieval evaluation
+* Reranking
 * Embedding model comparison
+* Retrieval evaluation
 * Azure AI Search vs Pinecone
 * Custom vector database experiments
-
-The goal is to understand **why retrieval works or fails**, not merely configure a managed service.
 
 ---
 
 ## Phase 4 — Agent Engineering
 
-Add:
+Build multi-agent workflows.
 
-* Multiple specialized agents
+Explore:
+
 * Agent orchestration
 * Planner/executor patterns
-* Tool use
+* Specialized agents
+* Tool-using agents
 * MCP servers
 * Human-in-the-loop workflows
 * Long-running workflows
-* State persistence
+* Persistent state
 
 Example:
 
@@ -919,13 +935,13 @@ Example:
 
 ## Phase 5 — Production AI Engineering
 
-Add:
+Learn:
 
 * CI/CD
 * Infrastructure as Code
 * Azure Key Vault
-* Private networking
 * Managed identities
+* Private networking
 * Application Insights
 * Distributed tracing
 * Load testing
@@ -940,14 +956,14 @@ Add:
 
 ## Phase 6 — Kubernetes
 
-Only after Docker and Azure Container Apps are comfortable:
+After Docker and Azure Container Apps:
 
 ```text
 Docker
    ↓
 Kubernetes
    ↓
-AKS
+Azure Kubernetes Service
    ↓
 Scalable AI Application
 ```
@@ -966,46 +982,117 @@ Learn:
 
 ---
 
-# Final Project Goal
+# 27. Learning Philosophy
 
-The eventual project should evolve into:
+This roadmap is intentionally incremental.
+
+Do not build every component simultaneously.
+
+Use:
 
 ```text
-             Angular Application
-                     │
-                     ▼
-                  FastAPI
-                     │
-                     ▼
-                LangGraph
-                     │
-            ┌────────┼─────────┐
-            │        │         │
-            ▼        ▼         ▼
-         Memory    Tools     Agents
-            │        │         │
-            └────────┼─────────┘
-                     ▼
-              Foundry Agent
-                     │
-                     ▼
-                Foundry IQ
-                     │
-                     ▼
-             Azure AI Search
-                     │
-          ┌──────────┼──────────┐
-          │          │          │
-          ▼          ▼          ▼
-       Blob       Vector      Metadata
-      Storage      Index       Filters
-          │
-          ▼
-   Healthcare Documents
+Learn
+  ↓
+Build
+  ↓
+Test
+  ↓
+Understand
+  ↓
+Document
+  ↓
+Improve
 ```
 
-The result is no longer simply a "RAG chatbot."
+Do not add a technology merely because it is popular.
 
-It becomes a **full AI-engineering system** demonstrating cloud infrastructure, retrieval, LLMs, agents, Python, APIs, state, memory, containers, deployment, evaluation, security, and observability.
+Every technology should answer a question:
 
-**Phase 1 objective: build the foundation before adding complexity.**
+> **What engineering problem does this technology solve?**
+
+---
+
+# 28. Progress Tracking
+
+After beginning the project, maintain a separate file:
+
+```text
+progress.txt
+```
+
+Use it to record:
+
+* What has been completed.
+* What is currently working.
+* What failed.
+* Errors encountered.
+* Azure resources created.
+* Configuration decisions.
+* Authentication/RBAC decisions.
+* Important discoveries.
+* Code changes.
+* Current project state.
+* Next recommended step.
+
+Example:
+
+```text
+DATE: 2026-09-XX
+
+COMPLETED:
+- Created resource group.
+- Created Foundry project.
+- Created Azure AI Search.
+- Configured managed identity.
+- Created knowledge source.
+- Connected knowledge base.
+
+CURRENT:
+- Python client working.
+- FastAPI not started.
+
+PROBLEMS:
+- ...
+
+DECISIONS:
+- ...
+
+NEXT:
+- ...
+```
+
+`LearningRoadmap.md` describes **where the project is going**.
+
+`progress.txt` describes **where the project actually is**.
+
+---
+
+# Phase 1 Objective
+
+By completing Phase 1, be able to explain and demonstrate:
+
+* RAG
+* Embeddings
+* Chunking
+* Vector retrieval
+* Hybrid retrieval
+* Semantic ranking
+* Azure AI Search
+* Knowledge sources
+* Knowledge bases
+* Foundry IQ
+* Foundry agents
+* Foundation models
+* Managed identities
+* RBAC
+* Python AI applications
+* FastAPI
+* Docker
+* Azure deployment
+* RAG evaluation
+* Monitoring
+* Basic AI safety
+
+The final result should be more than a chatbot.
+
+It should be a **small but realistic AI engineering system** that demonstrates the ability to design, build, evaluate, secure, and deploy an AI-powered application.
