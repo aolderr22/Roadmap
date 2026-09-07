@@ -18,3 +18,17 @@ Uploaded two healthcare PDF documents to the container.
 
 The documents are now stored in Azure Blob Storage / Data Lake Storage Gen2 and ready to be connected to the RAG retrieval pipeline.
 ---
+STEP 3 — Azure AI Search
+
+Created Azure AI Search service `search-healthcare-ai`.
+
+Resource group: `rg-healthcare-ai`.
+
+Region: Central US.
+
+Pricing tier: Basic.
+
+Central US was used because East US was unavailable for creating a new Azure AI Search service.
+
+Azure AI Search will provide the retrieval layer for the healthcare RAG pipeline.
+---
