@@ -1,1 +1,9 @@
-Welcome to the project!
+STEP 1 — Azure Resources
+
+Created resource group `rg-healthcare-ai`.
+
+Created Azure Storage Account `sthealthcaredocs2026` using Azure Blob Storage / Data Lake Storage Gen2.
+
+Region: East US.
+
+The storage account will serve as the persistent document storage layer for the healthcare RAG project.
