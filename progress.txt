@@ -32,3 +32,13 @@ Central US was used because East US was unavailable for creating a new Azure AI 
 
 Azure AI Search will provide the retrieval layer for the healthcare RAG pipeline.
 ---
+STEP 4 — Microsoft Foundry
+
+Created Microsoft Foundry resource `foundry-healthcare-ai`.
+
+Created Microsoft Foundry project `proj-healthcare-ai`.
+
+Region: East US.
+
+The Foundry project will provide the model and agent infrastructure for the healthcare RAG system.
+---
