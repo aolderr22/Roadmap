@@ -42,3 +42,11 @@ Region: East US.
 
 The Foundry project will provide the model and agent infrastructure for the healthcare RAG system.
 ---
+STEP 5 — Embedding Model
+
+Deployed the `text-embedding-3-small` embedding model in Microsoft Foundry.
+
+The deployment is available to the Foundry project and will be used to generate vector embeddings for documents ingested by Azure AI Search.
+
+The project is using the New Foundry experience.
+---
