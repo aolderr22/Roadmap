@@ -7,3 +7,14 @@ Created Azure Storage Account `sthealthcaredocs2026` using Azure Blob Storage / 
 Region: East US.
 
 The storage account will serve as the persistent document storage layer for the healthcare RAG project.
+---
+STEP 2 — Healthcare Document Storage
+
+Created the `healthcare-documents` container in Azure Storage Account `sthealthcaredocs2026`.
+
+Configured the container for private access.
+
+Uploaded two healthcare PDF documents to the container.
+
+The documents are now stored in Azure Blob Storage / Data Lake Storage Gen2 and ready to be connected to the RAG retrieval pipeline.
+---
