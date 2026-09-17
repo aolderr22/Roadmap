@@ -251,3 +251,42 @@ Verified that:
 * The Dockerized application successfully answers questions using the healthcare RAG system.
 
 Step 6 is complete.
+--
+### Step 7 — Azure Container Registry (ACR)
+
+Created an Azure Container Registry to store the Docker image for the healthcare RAG FastAPI application.
+
+Configured the registry:
+
+* Resource group: `rg-healthcare-ai`
+* Region: East US
+* Registry name: `healthcarerag2026`
+* SKU: Standard
+* Domain name label scope: Tenant Reuse
+* Role assignment permissions mode: RBAC Registry + ABAC Repository Permissions
+* Login server: `healthcarerag2026-bxgqg5erabcaf2gs.azurecr.io`
+
+Authenticated to Azure Container Registry using the Azure CLI:
+
+```bash
+az login
+az acr login --name healthcarerag2026
+```
+
+Tagged the local Docker image:
+
+```bash
+docker tag healthcare-rag-agent:latest healthcarerag2026-bxgqg5erabcaf2gs.azurecr.io/healthcare-rag-agent:latest
+```
+
+Because the registry uses RBAC Registry + ABAC Repository Permissions, assigned the `Container Registry Repository Writer` role to the Azure user so the Docker image could be pushed to the registry.
+
+Successfully pushed the Docker image to Azure Container Registry:
+
+```text
+healthcarerag2026-bxgqg5erabcaf2gs.azurecr.io/healthcare-rag-agent:latest
+```
+
+Verified that the `latest` image tag exists in the `healthcare-rag-agent` repository in ACR.
+
+Step 7 is complete.
