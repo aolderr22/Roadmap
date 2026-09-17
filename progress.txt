@@ -217,3 +217,37 @@ The Python application now provides both:
 
 * a terminal-based client through `main.py`
 * an HTTP API through FastAPI
+---
+---
+### Step 6 — Dockerize FastAPI Application
+
+Created a Dockerfile for the FastAPI application.
+
+Configured the Docker image to:
+* Use Python 3.13 slim as the base image.
+* Install the project's Python dependencies.
+* Install the Azure CLI inside the container.
+* Copy the application code into the image.
+* Expose port 8000.
+* Start the FastAPI application with Uvicorn using `app.api:app`.
+
+Created a `.dockerignore` file to prevent local development files and environment secrets from being included in the Docker image.
+
+Successfully built the Docker image as `healthcare-rag-agent:latest`.
+
+Configured local Docker authentication by:
+* Passing `.env` to the container at runtime rather than including it in the image.
+* Mounting the local Azure CLI configuration into the container.
+* Using `DefaultAzureCredential` to authenticate the application to Azure.
+
+Successfully started the FastAPI application inside Docker.
+
+Verified that:
+* The container starts successfully.
+* FastAPI starts successfully under Uvicorn.
+* The `/docs` Swagger UI is accessible.
+* The `/health` endpoint is available.
+* The `/ask` endpoint successfully communicates with the Microsoft Foundry Agent.
+* The Dockerized application successfully answers questions using the healthcare RAG system.
+
+Step 6 is complete.
