@@ -291,8 +291,51 @@ Verified that the `latest` image tag exists in the `healthcare-rag-agent` reposi
 
 Step 7 is complete.
 --
-(base) adamolderr@Adams-MacBook-Air healthcare-rag-agent % curl -X POST \
-  https://healthcare-rag-agent.blueforest-79fdbacb.eastus.azurecontainerapps.io/ask \
-  -H "Content-Type: application/json" \
-  -d '{"question":"What is diabetes?"}'
-{"answer":"Diabetes (diabetes mellitus) is a chronic condition in which the body can’t properly regulate blood glucose (sugar) because of problems with the hormone insulin. That leads to high blood glucose over time, which can damage blood vessels and organs.\n\nMain types\n- Type 1: the immune system destroys insulin-producing cells → little or no insulin; requires insulin replacement.\n- Type 2: the body becomes resistant to insulin and/or doesn’t make enough; often managed with diet, exercise, oral medicines, and sometimes insulin.\n- Gestational diabetes: high blood glucose that develops during pregnancy and usually resolves after delivery.\n\nCommon symptoms\n- Increased thirst and urination, unexplained weight loss, fatigue, blurred vision, slow-healing wounds, increased infections.\n\nHow it’s diagnosed (typical tests)\n- Fasting plasma glucose, oral glucose tolerance test, or hemoglobin A1c; elevated values on these tests indicate diabetes or prediabetes.\n\nBasic management goals\n- Keep blood glucose in target range, reduce cardiovascular risk (control blood pressure and lipids), and prevent or treat complications through lifestyle changes, medicines, and regular monitoring.\n\nFor more detailed, source-attributed medical guidance, ask about diagnosis, targets, or treatment options tailored to a specific situation【6:0†source】."}%      
+### Step 8 — Deploy FastAPI Application to Azure Container Apps
+
+Deployed the Dockerized FastAPI healthcare RAG application to Azure Container Apps.
+
+Created and configured:
+
+* Azure Container Apps environment: `healthcare-rag-env`
+* Azure Container App: `healthcare-rag-agent`
+* Public HTTPS ingress on port 8000
+* Azure Container Registry integration using the Container Apps environment managed identity
+
+The original Docker image was built on an Apple Silicon Mac and was ARM64. Azure Container Apps required a Linux AMD64 image, so the application was rebuilt using:
+
+`docker buildx build --platform linux/amd64`
+
+The AMD64 image was pushed to Azure Container Registry and successfully deployed to Azure Container Apps.
+
+Configured the Container App with the required environment variables:
+
+* `PROJECT_ENDPOINT`
+* `AGENT_NAME`
+
+Configured a system-assigned managed identity for the Container App.
+
+Granted the Container App managed identity access to the Microsoft Foundry project:
+
+* `Foundry Agent Consumer`
+* `Foundry User`
+
+The `Foundry User` role was required because the application creates a conversation during startup using:
+
+`openai.conversations.create()`
+
+Resolved authentication and authorization issues involving `DefaultAzureCredential` and the Container App managed identity.
+
+Verified that:
+
+* The Container App provisioning state is `Succeeded`.
+* The Container App is running.
+* FastAPI/Uvicorn starts successfully.
+* The `/health` endpoint returns `{"status":"healthy"}`.
+* The public `/ask` endpoint successfully communicates with the Microsoft Foundry healthcare RAG agent.
+* The deployed application successfully answers healthcare questions through the public Azure endpoint.
+
+The application is now running successfully in Azure Container Apps.
+
+Step 8 is complete.
+
