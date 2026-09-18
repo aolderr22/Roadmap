@@ -290,3 +290,9 @@ healthcarerag2026-bxgqg5erabcaf2gs.azurecr.io/healthcare-rag-agent:latest
 Verified that the `latest` image tag exists in the `healthcare-rag-agent` repository in ACR.
 
 Step 7 is complete.
+--
+(base) adamolderr@Adams-MacBook-Air healthcare-rag-agent % curl -X POST \
+  https://healthcare-rag-agent.blueforest-79fdbacb.eastus.azurecontainerapps.io/ask \
+  -H "Content-Type: application/json" \
+  -d '{"question":"What is diabetes?"}'
+{"answer":"Diabetes (diabetes mellitus) is a chronic condition in which the body can’t properly regulate blood glucose (sugar) because of problems with the hormone insulin. That leads to high blood glucose over time, which can damage blood vessels and organs.\n\nMain types\n- Type 1: the immune system destroys insulin-producing cells → little or no insulin; requires insulin replacement.\n- Type 2: the body becomes resistant to insulin and/or doesn’t make enough; often managed with diet, exercise, oral medicines, and sometimes insulin.\n- Gestational diabetes: high blood glucose that develops during pregnancy and usually resolves after delivery.\n\nCommon symptoms\n- Increased thirst and urination, unexplained weight loss, fatigue, blurred vision, slow-healing wounds, increased infections.\n\nHow it’s diagnosed (typical tests)\n- Fasting plasma glucose, oral glucose tolerance test, or hemoglobin A1c; elevated values on these tests indicate diabetes or prediabetes.\n\nBasic management goals\n- Keep blood glucose in target range, reduce cardiovascular risk (control blood pressure and lipids), and prevent or treat complications through lifestyle changes, medicines, and regular monitoring.\n\nFor more detailed, source-attributed medical guidance, ask about diagnosis, targets, or treatment options tailored to a specific situation【6:0†source】."}%      
